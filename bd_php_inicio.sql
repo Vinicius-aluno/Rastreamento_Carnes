@@ -217,6 +217,94 @@ CREATE TABLE comprador_tem_lotes (
   FOREIGN KEY (id_lote) REFERENCES lotes(id_lote)
 );
 
+/*====================================================
+  TABELA: FAZENDAS 
+====================================================*/
+CREATE TABLE fazendas (
+    id_fazenda INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(120) NOT NULL,
+    localizacao VARCHAR(255) NOT NULL,
+    produtor VARCHAR(120) NOT NULL
+);
+
+/*====================================================
+  TABELA: ANIMAIS 
+====================================================*/
+CREATE TABLE animais (
+    id_animal INT AUTO_INCREMENT PRIMARY KEY,
+    codigo_identificacao VARCHAR(100) NOT NULL UNIQUE,
+    especie ENUM('bovino','suino') NOT NULL,
+    idade INT NOT NULL,
+    peso_inicial DECIMAL(10,2) NOT NULL,
+    id_fazenda INT NOT NULL,
+    FOREIGN KEY (id_fazenda) REFERENCES fazendas(id_fazenda)
+);
+
+/*====================================================
+  TABELA: TRANSPORTE FAZENDA → FRIGORÍFICO
+====================================================*/
+CREATE TABLE transporte_fazenda (
+    id_transporte INT AUTO_INCREMENT PRIMARY KEY,
+    id_animal INT NOT NULL,
+    motorista VARCHAR(120) NOT NULL,
+    placa_caminhao VARCHAR(12) NOT NULL,
+    data_saida DATE NOT NULL,
+    data_chegada DATE NOT NULL,
+    destino VARCHAR(150) NOT NULL,
+    FOREIGN KEY (id_animal) REFERENCES animais(id_animal)
+);
+
+/*====================================================
+  TABELA: ABATE NO FRIGORÍFICO
+====================================================*/
+CREATE TABLE abate (
+    id_abate INT AUTO_INCREMENT PRIMARY KEY,
+    id_animal INT NOT NULL,
+    data_abate DATE NOT NULL,
+    frigorifico VARCHAR(150) NOT NULL,
+    veterinario VARCHAR(120) NOT NULL,
+    status_inspecao ENUM('aprovado','reprovado') NOT NULL,
+    FOREIGN KEY (id_animal) REFERENCES animais(id_animal)
+);
+
+/*====================================================
+  TABELA: PROCESSAMENTO (LOTE)
+====================================================*/
+CREATE TABLE processamento (
+    id_processamento INT AUTO_INCREMENT PRIMARY KEY,
+    id_animal INT NOT NULL,
+    lote VARCHAR(100) NOT NULL,
+    peso_final DECIMAL(10,2) NOT NULL,
+    selo_inspecao ENUM('SIF','SIE','SISBI') NOT NULL,
+    FOREIGN KEY (id_animal) REFERENCES animais(id_animal)
+);
+
+/*====================================================
+  TABELA: DISTRIBUIÇÃO
+====================================================*/
+CREATE TABLE distribuicao (
+    id_distribuicao INT AUTO_INCREMENT PRIMARY KEY,
+    id_processamento INT NOT NULL,
+    armazem_origem VARCHAR(150) NOT NULL,
+    destino_loja VARCHAR(150) NOT NULL,
+    data_envio DATE NOT NULL,
+    data_recebimento DATE NOT NULL,
+    FOREIGN KEY (id_processamento) REFERENCES processamento(id_processamento)
+);
+
+/*====================================================
+  TABELA: CHEGADA NA LOJA
+====================================================*/
+CREATE TABLE loja (
+    id_loja INT AUTO_INCREMENT PRIMARY KEY,
+    id_distribuicao INT NOT NULL,
+    responsavel_recebimento VARCHAR(120) NOT NULL,
+    data_conferencia DATE NOT NULL,
+    observacoes TEXT,
+    FOREIGN KEY (id_distribuicao) REFERENCES distribuicao(id_distribuicao)
+);
+
+
 -- ==================================================================
 -- TABELAS DE RELAÇÃO
 -- ==================================================================
